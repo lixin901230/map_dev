@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />  
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+	<title>百度地图简单示例</title>
+	<style type="text/css">  
+		html{height:100%}  
+		body{height:100%;margin:0px;padding:0px}  
+		#container{height:100%}  
+	</style> 
+	<!-- 
+		v2.0版本的引用方式：src="http://api.map.baidu.com/api?v=2.0&ak=您的密钥"
+		v1.4版本及以前版本的引用方式：src="http://api.map.baidu.com/api?v=1.4&key=您的密钥&callback=initialize" -->
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=1.4"></script>
+<!-- 	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=bWGSXoLbp9iQGjYhdofM8BlwZPpKdbdm"></script> -->
+	
+	<!-- 鼠标拉框放大地图 -->
+	<script type="text/javascript" src="http://api.map.baidu.com/library/RectangleZoom/1.2/src/RectangleZoom_min.js"></script>
+	
+	<!--加载鼠标绘制工具-->
+	<script type="text/javascript" src="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.js"></script>
+	<link rel="stylesheet" href="http://api.map.baidu.com/library/DrawingManager/1.4/src/DrawingManager_min.css" />
+	<!--加载检索信息窗口-->
+	<script type="text/javascript" src="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.js"></script>
+	<link rel="stylesheet" href="http://api.map.baidu.com/library/SearchInfoWindow/1.4/src/SearchInfoWindow_min.css" />
+	
+	<script type="text/javascript" src="http://libs.baidu.com/jquery/1.9.1/jquery.js"></script>
+</head>
+<body>
+	<div id="container"></div>
+	<script type="text/javascript"> 
+		var map = new BMap.Map("container");          // 创建地图实例  
+		var point = new BMap.Point(116.404, 39.915);  // 创建点坐标  
+		map.centerAndZoom(point, 15);                 // 初始化地图，设置中心点坐标和地图级别  
+		
+		map.enableScrollWheelZoom();                 //启用滚轮放大缩小
+		
+		//开启拉框放大
+		var myDrag = new BMapLib.RectangleZoom(map, {
+			followText: "拖拽鼠标进行操作"
+		});
+		$('#container').focus().on("mousedown mouseup", function(event) {
+			var eType = event.type;
+			if(eType == 'mousedown' && event.button == 0) {	// 鼠标左键；0：左鍵、1：滚动、2：右键
+		      	if (event.ctrlKey) { // ctrl
+					myDrag.open();	// 开启拉框放大
+		      	}
+		   	}
+		});
+		$(window).on("keyup", function(event){
+			if(!event.ctrlKey || eType == 'keyup') {
+				myDrag.close();	// 关闭拉框放大
+			}
+		});
+		
+		// 加载鼠标绘制
+		var overlays = [];
+		var overlaycomplete = function(e){
+	        overlays.push(e.overlay);
+	    };
+	    var styleOptions = {
+	        strokeColor:"red",    //边线颜色。
+	        fillColor:"red",      //填充颜色。当参数为空时，圆形将没有填充效果。
+	        strokeWeight: 3,       //边线的宽度，以像素为单位。
+	        strokeOpacity: 0.8,	   //边线透明度，取值范围0 - 1。
+	        fillOpacity: 0.6,      //填充的透明度，取值范围0 - 1。
+	        strokeStyle: 'solid' //边线的样式，solid或dashed。
+	    }
+	    //实例化鼠标绘制工具
+	    var drawingManager = new BMapLib.DrawingManager(map, {
+	        isOpen: false, //是否开启绘制模式
+	        enableDrawingTool: true, //是否显示工具栏
+	        drawingToolOptions: {
+	            anchor: BMAP_ANCHOR_TOP_RIGHT, //位置
+	            offset: new BMap.Size(5, 5), //偏离值
+	        },
+	        circleOptions: styleOptions, //圆的样式
+	        polylineOptions: styleOptions, //线的样式
+	        polygonOptions: styleOptions, //多边形的样式
+	        rectangleOptions: styleOptions //矩形的样式
+	    });  
+		 //添加鼠标绘制工具监听事件，用于获取绘制结果
+	    drawingManager.addEventListener('overlaycomplete', overlaycomplete);
+	    function clearAll() {
+			for(var i = 0; i < overlays.length; i++){
+	            map.removeOverlay(overlays[i]);
+	        }
+	        overlays.length = 0   
+	    }
+	</script>
+</body>
+</html>
